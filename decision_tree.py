@@ -33,14 +33,18 @@ def get_mae(max_leaf_nodes,traX,reaX,traY,reaY):
     return mae
 
 #finding best tree size to minimize mean error
+'''
 mae_data=[]
 for i in sample_max_leaf_nodes:
     print("Trying leaf size: "+str(i))
     mae_data.append(get_mae(i,x_train,x_test,y_train,y_test))
 best_tree_size = sample_max_leaf_nodes[mae_data.index(min(mae_data))]
-print("BEST TREE SIZE")
+print("BEST TREE SIZE") #100000
 print(best_tree_size)
+'''
 
+#after several test, we found out the max_leaf_nodes that given a good mean error is 100000
+best_tree_size=100000
 final_model=DecisionTreeRegressor(max_leaf_nodes=best_tree_size,random_state=1)
 final_model.fit(x,y)
 print("Second model mean error: ")
