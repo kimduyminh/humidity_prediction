@@ -1,3 +1,6 @@
+from timeit import default_timer as timer
+start = timer()
+
 #import required libraries
 
 import pandas as pd
@@ -21,7 +24,9 @@ prediction1=model1.predict(x_test)
 print("First model mean error: ")
 print(mean_absolute_error(y_test,prediction1))
 
-#model 2 (Optimized based on tree max_leaf_nodes)
+end =  timer()
+print(end-start)
+#model 2 (Optimized based on number of tree)
 n_list=[5,10,20,50,100,200,500]
 
 #mean calculator function:
@@ -36,7 +41,7 @@ def get_mae(n,traX,reaX,traY,reaY):
 
 mae_data=[]
 for i in n_list:
-    print("Trying leaf size: "+str(i))
+    print("Trying tree numbers: "+str(i))
     mae_data.append(get_mae(i,x_train,x_test,y_train,y_test))
 best_tree_size = n_list[mae_data.index(min(mae_data))]
 print("BEST NUMBER OF TREES") #100000
