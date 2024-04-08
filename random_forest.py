@@ -16,7 +16,7 @@ encoded_data=pd.get_dummies(data,columns=["province","wind_d","date"])
 y=encoded_data.humidi
 x=encoded_data.drop('humidi', axis=1)
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
-
+'''
 #model1 (not optimized)
 model1=RandomForestRegressor()
 model1.fit(x_train,y_train)
@@ -25,9 +25,9 @@ print("First model mean error: ")
 print(mean_absolute_error(y_test,prediction1))
 
 end =  timer()
-print(end-start)
+print(end-start)'''
 #model 2 (Optimized based on number of tree)
-n_list=[5,10,20,50,100,200,500]
+n_list=[5,10]
 
 #mean calculator function:
 def get_mae(n,traX,reaX,traY,reaY):
