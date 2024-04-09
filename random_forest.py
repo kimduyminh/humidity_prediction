@@ -1,5 +1,4 @@
-from timeit import default_timer as timer
-start = timer()
+
 
 #import required libraries
 
@@ -7,6 +6,12 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder
+import os
+from timeit import default_timer as timer
 
 #import files and handling datas
 data=pd.read_csv("weather.csv")
@@ -15,25 +20,66 @@ encoded_data=pd.get_dummies(data,columns=["province","wind_d","date"])
 #setting variables and target variable
 y=encoded_data.humidi
 x=encoded_data.drop('humidi', axis=1)
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
+x_train_full, x_test_full, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
+print(x_test_full.columns)
+cate_cols=[cname for cname in x_train_full.columns if x_train_full[cname].nunique()<10 and x_train_full[cname].dtype=="object"]
+nume_cols=[cname for cname in x_train_full.columns if x_train_full[cname].dtype in ['int64','float64']]
+
+cols=cate_cols+nume_cols
+print(cols)
+x_train=x_train_full[cols]
+x_test=x_test_full[cols]
+
+#preprocessing
+# Preprocessing for numerical data
+numerical_transformer = SimpleImputer(strategy='constant')
+
+# Preprocessing for categorical data
+categorical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('onehot', OneHotEncoder(handle_unknown='ignore'))
+])
+
+# Bundle preprocessing for numerical and categorical data
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', numerical_transformer, nume_cols),
+        ('cat', categorical_transformer, cate_cols)
+    ])
 
 #model1 (not optimized)
-model1=RandomForestRegressor()
-model1.fit(x_train,y_train)
-prediction1=model1.predict(x_test)
+cpu_cores=10
+start = timer()
+model_1=RandomForestRegressor(n_jobs=cpu_cores)
+pipeline1=Pipeline(steps=[('preprocessor', preprocessor),
+                              ('model', model_1)
+                             ])
+pipeline1.fit(x_train,y_train)
+prediction1=pipeline1.predict(x_test)
 print("First model mean error: ")
 print(mean_absolute_error(y_test,prediction1))
 
-end =  timer()
+end =timer()
 print(end-start)
-#model 2 (Optimized based on number of tree)
-n_list=[5,10,20,50,100,200,500]
 
+'''#stock model
+start=timer()
+model_1=RandomForestRegressor()
+model_1.fit(x_train_full,y_train)
+test=model_1.predict(x_test_full)
+print("Stock mea: ")
+print(mean_absolute_error(y_test,test))'''
+
+#model 2 (Optimized based on number of tree)
+n_list=[5000]
 #mean calculator function:
 def get_mae(n,traX,reaX,traY,reaY):
-    model_2=RandomForestRegressor(n_estimators=n,random_state=1)
-    model_2.fit(traX,traY)
-    predict_val=model_2.predict(reaX)
+    model_2=RandomForestRegressor(n_estimators=n,random_state=1,n_jobs=cpu_cores)
+    pipeline2 = Pipeline(steps=[('preprocessor', preprocessor),
+                                ('model', model_2)
+                                ])
+    pipeline2.fit(traX,traY)
+    predict_val=pipeline2.predict(reaX)
     mae=mean_absolute_error(reaY,predict_val)
     return mae
 
@@ -41,9 +87,15 @@ def get_mae(n,traX,reaX,traY,reaY):
 
 mae_data=[]
 for i in n_list:
+    start = timer()
+    print("\n")
     print("Trying tree numbers: "+str(i))
-    mae_data.append(get_mae(i,x_train,x_test,y_train,y_test))
+    a=get_mae(i,x_train,x_test,y_train,y_test)
+    mae_data.append(a)
+    print("Mae: "+str(a))
+    end = timer()
+    print(str(end - start)+"s")
 best_tree_size = n_list[mae_data.index(min(mae_data))]
-print("BEST NUMBER OF TREES") #100000
+print("BEST NUMBER OF TREES")
 print(best_tree_size)
 
