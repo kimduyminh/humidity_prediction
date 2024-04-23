@@ -21,12 +21,11 @@ encoded_data=pd.get_dummies(data,columns=["province","wind_d","date"])
 y=encoded_data.humidi
 x=encoded_data.drop('humidi', axis=1)
 x_train_full, x_test_full, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
-print(x_test_full.columns)
+
+#drop cols with too much difference value
 cate_cols=[cname for cname in x_train_full.columns if x_train_full[cname].nunique()<10 and x_train_full[cname].dtype=="object"]
 nume_cols=[cname for cname in x_train_full.columns if x_train_full[cname].dtype in ['int64','float64']]
-
 cols=cate_cols+nume_cols
-print(cols)
 x_train=x_train_full[cols]
 x_test=x_test_full[cols]
 
@@ -61,14 +60,6 @@ print(mean_absolute_error(y_test,prediction1))
 
 end =timer()
 print(end-start)
-
-'''#stock model
-start=timer()
-model_1=RandomForestRegressor()
-model_1.fit(x_train_full,y_train)
-test=model_1.predict(x_test_full)
-print("Stock mea: ")
-print(mean_absolute_error(y_test,test))'''
 
 #model 2 (Optimized based on number of tree)
 n_list=[5000]
