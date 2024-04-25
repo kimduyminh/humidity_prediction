@@ -1,5 +1,3 @@
-
-
 #import required libraries
 
 import pandas as pd
@@ -55,14 +53,14 @@ pipeline1=Pipeline(steps=[('preprocessor', preprocessor),
                              ])
 pipeline1.fit(x_train,y_train)
 prediction1=pipeline1.predict(x_test)
-print("First model mean error: ")
+print("Unoptimized model mean error: ")
 print(mean_absolute_error(y_test,prediction1))
 
 end =timer()
 print(end-start)
 
 #model 2 (Optimized based on number of tree)
-n_list=[5000]
+n_list=[2000,5000,10000]
 #mean calculator function:
 def get_mae(n,traX,reaX,traY,reaY):
     model_2=RandomForestRegressor(n_estimators=n,random_state=1,n_jobs=cpu_cores)
@@ -75,7 +73,6 @@ def get_mae(n,traX,reaX,traY,reaY):
     return mae
 
 #finding best tree number to minimize mean error
-
 mae_data=[]
 for i in n_list:
     start = timer()
@@ -90,3 +87,7 @@ best_tree_size = n_list[mae_data.index(min(mae_data))]
 print("BEST NUMBER OF TREES")
 print(best_tree_size)
 
+optimized_model=RandomForestRegressor(n_estimators=best_tree_size,random_state=1,n_jobs=cpu_cores)
+optimized_model.fit(x_train,y_train)
+predition_optimized=optimized_model.predict(x_test)
+print("Optimized model mean error: "+mean_absolute_error(y_test,predition_optimized))

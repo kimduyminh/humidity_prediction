@@ -18,20 +18,13 @@ y=encoded_data.humidi
 x=encoded_data.drop('humidi', axis=1)
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
 
-# Check for NaN or infinite values in your data
-print("Any NaN in data: ", pd.isna(encoded_data).any().any())
-print("Any Inf in data: ", np.isinf(encoded_data).any().any())
-
-
-
-
 #model1(not optimized)
 model_1=Ridge()
 
 #train the model
 model_1.fit(x_train,y_train)
 prediction1=model_1.predict(x_test)
-print("mae "+str(mean_absolute_error(y_test,prediction1)))
+print("Unoptimized Model Mean Error: "+str(mean_absolute_error(y_test,prediction1)))
 
 #model2(Optimizing based on finding the best alpha)
 alphas=np.logspace(-4, 2, 100)
@@ -47,7 +40,7 @@ optimal_alpha=min(mea)
 model_2=Ridge(alpha=optimal_alpha)
 model_2.fit(x_train,y_train)
 prediction2=model_2.predict(x_test)
-print("mae "+str(mean_absolute_error(y_train,prediction2)))
+print("Optimized Model Mean Error: "+str(mean_absolute_error(y_train,prediction2)))
 
 #side info: the selection of alpha affect directly and hugely to the accuracy of the prediction,
 # so the value of alpha might need to be examine more to decrease the mean error value

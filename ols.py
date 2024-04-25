@@ -25,4 +25,4 @@ coef_int=[float(i) for i in coef]
 print(coef)
 #calculate the mean error
 prediction=model.predict(x_test)
-print("Mae: "+str(mean_absolute_error(y_test,prediction)))
+print("OLS Model Mean Error: "+str(mean_absolute_error(y_test,prediction)))
