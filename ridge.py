@@ -6,24 +6,57 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 import numpy as np
 from sklearn.preprocessing import StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder
 
+#import files and handling datas
+data=pd.read_csv("weather.csv")
+
+#setting variables and target variable
+y=data.humidi
+x=data.drop('humidi', axis=1)
 #import files and handling datas
 data=pd.read_csv("weather.csv")
 encoded_data=pd.get_dummies(data,columns=["province","wind_d","date"])
 scaler = StandardScaler()
-encoded_data_scaled = pd.DataFrame(scaler.fit_transform(encoded_data), columns=encoded_data.columns)
+x_train_full, x_test_full, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
 
-#setting variables and target variable
-y=encoded_data.humidi
-x=encoded_data.drop('humidi', axis=1)
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
+#drop cols with too much difference value
+cate_cols=[cname for cname in x_train_full.columns if x_train_full[cname].nunique()<10 and x_train_full[cname].dtype=="object"]
+nume_cols=[cname for cname in x_train_full.columns if x_train_full[cname].dtype in ['int64','float64']]
+cols=cate_cols+nume_cols
+x_train=x_train_full#[cols]
+x_test=x_test_full#[cols]
+
+#preprocessing
+# Preprocessing for numerical data
+numerical_transformer = SimpleImputer(strategy='constant')
+
+# Preprocessing for categorical data
+categorical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('onehot', OneHotEncoder(handle_unknown='ignore'))
+])
+
+# Bundle preprocessing for numerical and categorical data
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', numerical_transformer, nume_cols),
+        ('cat', categorical_transformer, cate_cols)
+    ])
+
 
 #model1(not optimized)
 model_1=Ridge()
+pipeline1=Pipeline(steps=[('preprocessor', preprocessor),
+                              ('model', model_1)
+                             ])
 
 #train the model
-model_1.fit(x_train,y_train)
-prediction1=model_1.predict(x_test)
+pipeline1.fit(x_train,y_train)
+prediction1=pipeline1.predict(x_test)
 print("Unoptimized Model Mean Error: "+str(mean_absolute_error(y_test,prediction1)))
 
 #model2(Optimizing based on finding the best alpha)
@@ -31,16 +64,22 @@ alphas=np.logspace(-4, 2, 100)
 mea=[]
 progress=1
 for i in alphas:
-    model_cv=RidgeCV(alphas=i,cv=5)
-    model_cv.fit(x_train,y_train)
-    mea.append(mean_absolute_error(y_test,model_cv.predict(x_test)))
+    model_2=Ridge(alpha=i)
+    pipeline2 = Pipeline(steps=[('preprocessor', preprocessor),
+                                ('model', model_2)
+                                ])
+    pipeline2.fit(x_train,y_train)
+    mea.append(mean_absolute_error(y_test,pipeline2.predict(x_test)))
     print(str(progress)+"%")
     progress+=1
 optimal_alpha=min(mea)
-model_2=Ridge(alpha=optimal_alpha)
-model_2.fit(x_train,y_train)
-prediction2=model_2.predict(x_test)
-print("Optimized Model Mean Error: "+str(mean_absolute_error(y_train,prediction2)))
+model_3=Ridge(alpha=optimal_alpha)
+pipeline3=Pipeline(steps=[('preprocessor', preprocessor),
+                              ('model', model_3)
+                             ])
+pipeline3.fit(x_train,y_train)
+prediction2=pipeline3.predict(x_test)
+print("Optimized Model Mean Error: "+str(mean_absolute_error(y_test,prediction2)))
 
 #side info: the selection of alpha affect directly and hugely to the accuracy of the prediction,
 # so the value of alpha might need to be examine more to decrease the mean error value
