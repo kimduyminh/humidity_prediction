@@ -11,6 +11,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.linear_model import LinearRegression
 #import data
 data=pd.read_csv(r"weather.csv")
 
@@ -45,11 +46,11 @@ preprocessor = ColumnTransformer(
 
 #svr
 print("SVR")
-svr = SVR()
-svr_model=Pipeline(steps=[('preprocessor', preprocessor),
-                              ('model', svr)
+lr = LinearRegression()
+lr_model=Pipeline(steps=[('preprocessor', preprocessor),
+                              ('model', lr)
                              ])
-svr_model.fit(x_train, y_train)
+lr_model.fit(x_train, y_train)
 
 #random forest
 print("RF")
@@ -69,7 +70,7 @@ ridge_model=Pipeline(steps=[('preprocessor', preprocessor),
 ridge_model.fit(x_train,y_train)
 
 #voting
-ereg = VotingRegressor(estimators=[('ridge', ridge_model), ('rf', rfr_model) , ('svr', svr_model)],weights = [1,3,2])
+ereg = VotingRegressor(estimators=[('ridge', ridge_model), ('rf', rfr_model) , ('lrr', lr_model)],weights = [2,3,1])
 ereg.fit(x_train, y_train)
 prediction=ereg.predict(x_test)
 print("MSR: "+str(mean_squared_error(y_test, prediction)))
