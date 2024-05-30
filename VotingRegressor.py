@@ -1,14 +1,18 @@
-#import required libs
 import pandas as pd
-from sklearn import linear_model
+import numpy as np
+
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
+from sklearn.svm import SVR
+from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error,f1_score
+from sklearn.ensemble import VotingRegressor
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder
-#import files and handling datas
-data=pd.read_csv("weather.csv")
+#import data
+data=pd.read_csv(r"weather.csv")
 
 #setting variables and target variable
 y=data.humidi
@@ -39,21 +43,35 @@ preprocessor = ColumnTransformer(
         ('cat', categorical_transformer, cate_cols)
     ])
 
-
-#create model
-model=linear_model.LinearRegression()
-pipeline=Pipeline(steps=[('preprocessor', preprocessor),
-                              ('model', model)
+#svr
+print("SVR")
+svr = SVR()
+svr_model=Pipeline(steps=[('preprocessor', preprocessor),
+                              ('model', svr)
                              ])
-#train model
-pipeline.fit(x_train,y_train)
+svr_model.fit(x_train, y_train)
 
-#print the model coefficients
-coef=model.coef_
-coef_int=[float(i) for i in coef]
-print(coef)
-#calculate the mean error
-prediction=pipeline.predict(x_test)
+#random forest
+print("RF")
+cpu_cores=8
+rfr=RandomForestRegressor(n_estimators=2000,random_state=1,n_jobs=cpu_cores)
+rfr_model=Pipeline(steps=[('preprocessor', preprocessor),
+                          ('model', rfr)
+                          ])
+rfr_model.fit(x_train, y_train)
+
+#ridge
+print("R")
+ridge=Ridge(alpha=0.0001)
+ridge_model=Pipeline(steps=[('preprocessor', preprocessor),
+                              ('model', ridge)
+                             ])
+ridge_model.fit(x_train,y_train)
+
+#voting
+ereg = VotingRegressor(estimators=[('ridge', ridge_model), ('rf', rfr_model) , ('svr', svr_model)],weights = [1,3,2])
+ereg.fit(x_train, y_train)
+prediction=ereg.predict(x_test)
 print("MSR: "+str(mean_squared_error(y_test, prediction)))
 print("MAE: "+str(mean_absolute_error(y_test, prediction)))
 print("R2: "+str(r2_score(y_test, prediction)))

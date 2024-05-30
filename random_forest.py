@@ -2,7 +2,7 @@
 
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error,f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -92,5 +92,7 @@ pipeline3=Pipeline(steps=[('preprocessor', preprocessor),
                               ('model', optimized_model)
                              ])
 pipeline3.fit(x_train,y_train)
-predition_optimized=pipeline3.predict(x_test)
-print("Optimized model mean error: "+str(mean_absolute_error(y_test,predition_optimized)))
+prediction=pipeline3.predict(x_test)
+print("MSR: "+str(mean_squared_error(y_test, prediction)))
+print("MAE: "+str(mean_absolute_error(y_test, prediction)))
+print("R2: "+str(r2_score(y_test, prediction)))
