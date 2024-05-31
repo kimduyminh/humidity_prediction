@@ -8,6 +8,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder
+import pickle
 
 #import files and handling datas
 data=pd.read_csv("weather.csv")
@@ -68,6 +69,8 @@ pipeline3=Pipeline(steps=[('preprocessor', preprocessor),
                               ('model', model_2)
                              ])
 pipeline3.fit(x_train, y_train)
+filename = "lasso.pickle"
+pickle.dump(pipeline3, open(filename, "wb"))
 prediction=pipeline3.predict(x_test)
 print(model_2.coef_)
 print("MSR: "+str(mean_squared_error(y_test, prediction)))

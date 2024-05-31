@@ -8,7 +8,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder
-import os
+import pickle
 from timeit import default_timer as timer
 
 #import files and handling datas
@@ -92,6 +92,8 @@ pipeline3=Pipeline(steps=[('preprocessor', preprocessor),
                               ('model', optimized_model)
                              ])
 pipeline3.fit(x_train,y_train)
+filename = "random_forest.pickle"
+pickle.dump(pipeline3, open(filename, "wb"))
 prediction=pipeline3.predict(x_test)
 print("MSR: "+str(mean_squared_error(y_test, prediction)))
 print("MAE: "+str(mean_absolute_error(y_test, prediction)))

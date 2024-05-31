@@ -7,6 +7,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder
+import pickle
 #import files and handling datas
 data=pd.read_csv("weather.csv")
 
@@ -47,6 +48,8 @@ pipeline=Pipeline(steps=[('preprocessor', preprocessor),
                              ])
 #train model
 pipeline.fit(x_train,y_train)
+filename = "ols.pickle"
+pickle.dump(pipeline, open(filename, "wb"))
 
 #print the model coefficients
 coef=model.coef_

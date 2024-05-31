@@ -11,6 +11,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder
+import pickle
 #import data
 data=pd.read_csv(r"weather.csv")
 
@@ -71,6 +72,8 @@ ridge_model.fit(x_train,y_train)
 #voting
 ereg = VotingRegressor(estimators=[('ridge', ridge_model), ('rf', rfr_model) , ('svr', svr_model)],weights = [1,3,2])
 ereg.fit(x_train, y_train)
+filename = "voting_regressor.pickle"
+pickle.dump(ereg, open(filename, "wb"))
 prediction=ereg.predict(x_test)
 print("MSR: "+str(mean_squared_error(y_test, prediction)))
 print("MAE: "+str(mean_absolute_error(y_test, prediction)))

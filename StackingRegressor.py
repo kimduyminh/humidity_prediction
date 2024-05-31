@@ -5,7 +5,7 @@ from sklearn.linear_model import RidgeCV
 from sklearn.svm import LinearSVR
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import StackingRegressor
-
+import pickle
 # Import data
 data = pd.read_csv(r"weather.csv")
 
@@ -55,6 +55,8 @@ reg = StackingRegressor(
 
 # Fit the stacking regressor
 reg.fit(x_train, y_train)
+filename = "decision_tree.pickle"
+pickle.dump(reg, open(filename, "wb"))
 
 # Make predictions
 prediction = reg.predict(x_test)
