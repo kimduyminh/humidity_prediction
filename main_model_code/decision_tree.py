@@ -2,15 +2,15 @@
 
 import pandas as pd
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder
-
+import pickle
 #import data
-data=pd.read_csv(r"weather.csv")
+data=pd.read_csv("weather.csv")
 
 #setting variables and target variable
 y=data.humidi
@@ -85,8 +85,13 @@ pipeline3 = Pipeline(steps=[('preprocessor', preprocessor),
                                 ('model', final_model)
                                 ])
 pipeline3.fit(x_train,y_train)
+filename = "../trained_model/decision_tree.pickle"
+pickle.dump(pipeline3, open(filename, "wb"))
 print("Optimized model mean error: ")
+print(x_test.head(3))
 prediction=pipeline3.predict(x_test)
-print(mean_absolute_error(y_test,prediction))
+print("MSR: "+str(mean_squared_error(y_test, prediction)))
+print("MAE: "+str(mean_absolute_error(y_test, prediction)))
+print("R2: "+str(r2_score(y_test, prediction)))
 
 

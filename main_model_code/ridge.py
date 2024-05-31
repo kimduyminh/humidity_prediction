@@ -1,8 +1,7 @@
 #import required library
 import pandas as pd
 from sklearn.linear_model import Ridge
-from sklearn.linear_model import RidgeCV
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error,f1_score
 from sklearn.model_selection import train_test_split
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -10,7 +9,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder
-
+import pickle
 #import files and handling datas
 data=pd.read_csv("weather.csv")
 
@@ -72,14 +71,19 @@ for i in alphas:
     mea.append(mean_absolute_error(y_test,pipeline2.predict(x_test)))
     print(str(progress)+"%")
     progress+=1
-optimal_alpha=min(mea)
+optimal_alpha=alphas[mea.index(min(mea))]
+print("Optimal alpha "+str(optimal_alpha))
 model_3=Ridge(alpha=optimal_alpha)
 pipeline3=Pipeline(steps=[('preprocessor', preprocessor),
                               ('model', model_3)
                              ])
 pipeline3.fit(x_train,y_train)
-prediction2=pipeline3.predict(x_test)
-print("Optimized Model Mean Error: "+str(mean_absolute_error(y_test,prediction2)))
+filename = "../trained_model/ridge.pickle"
+pickle.dump(pipeline3, open(filename, "wb"))
+prediction=pipeline3.predict(x_test)
+print("MSR: "+str(mean_squared_error(y_test, prediction)))
+print("MAE: "+str(mean_absolute_error(y_test, prediction)))
+print("R2: "+str(r2_score(y_test, prediction)))
 
 #side info: the selection of alpha affect directly and hugely to the accuracy of the prediction,
 # so the value of alpha might need to be examine more to decrease the mean error value
