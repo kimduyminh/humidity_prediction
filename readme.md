@@ -19,7 +19,7 @@ To use this package, follow these steps:
 1. Clone the repository: git clone https://github.com/kimduyminh/humidity_prediction
 2. Navigate to the project directory: cd Rainfall-Prediction
 3. Install dependencies: pip install -r requirements.txt
-4. Download the pretrained model which is not included because of model size
+4. Download the pretrained model which is not included because of model size, or you can just run the model inside main_model_code
     https://gamecrack-my.sharepoint.com/:f:/g/personal/game_gamecrack_onmicrosoft_com/Eq8XprAezWdOvXIvsCq_dWsB3dSOiZF60HxCl6PqchRW6A?e=aV6hfM
 ## Usage <a name="usage"></a>
 
