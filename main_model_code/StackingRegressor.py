@@ -40,12 +40,12 @@ x_test = x_test_full[cols]
 
 # Define base models
 estimators = [
-    ('lr', RidgeCV()),
+    ('RFR', RandomForestRegressor(n_estimators=2000, random_state=42)),
    ('svr', LinearSVR(dual='auto',random_state=42))
 ]
 
 # Define the final model pipeline
-final_model = RandomForestRegressor(n_estimators=2000, random_state=42)
+final_model = RidgeCV(alphas=0.0001)
 
 # Create the stacking regressor
 reg = StackingRegressor(
